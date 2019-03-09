@@ -4,7 +4,7 @@ import pexpect as pexpect
 
 
 class Moonlight:
-    def __init__(self, ip):
+    def __init__(self, ip = None):
         # Configuration
         self.config = {}
         self.app = None
@@ -13,26 +13,30 @@ class Moonlight:
         # Other
         self.executable = "moonlight"
         self.workingdir = "bin"
+        self.configdir = "~/.config/pymoonlight"
         self.proc = None
 
     def loadConfig(self):
         try:
-            cfg = json.loads(open("config.txt", "r").read())
+            if not os.path.exists(self.configdir):
+                os.makedirs(self.configdir)
+            cfg = json.loads(open(self.getConfigPath(), "r").read())
             self.config.update(cfg)
+            self.ip = cfg.get("host")
         except IOError:
-            print("Failed to read config.txt")
+            print("Failed to read '{}'".format(self.getConfigPath()))
 
     def getConfig(self):
         return self.config
 
     def saveConfig(self):
-        with open("config.txt", "w") as outfile:
+        with open(self.getConfigPath(), "w") as outfile:
             json.dump(self.config, outfile)
 
     def execute(self, args, includeip=True):
         ar = [self.executable]
         ar += args
-        if includeip:
+        if includeip and self.isIpDefined():
             ar += [self.ip]
 
         if not os.path.exists(self.workingdir):
@@ -69,21 +73,27 @@ class Moonlight:
         process = self.execute(["quit"])
         process.wait()
 
+    def unpair(self):
+        if self.proc != None:
+            self.proc.kill()
+        process = self.execute(["unpair"])
+        process.wait()
+
     def stream(self, app=None):
         args = ["stream"]
-        if os.path.isfile("bin/mapping.map"):
+        if self.hasGamepadMapping():
             args.append("-mapping")
-            args.append("mapping.map")
+            args.append(self.getMappingPath())
         if "width" in self.config:
             args.append("-width")
             args.append(str(self.config["width"]))
         if "height" in self.config:
             args.append("-height")
             args.append(str(self.config["height"]))
-        if "framerate" in self.config:
+        if "framerate" in self.config and self.config["framerate"]:
             args.append("-fps")
             args.append(str(self.config["framerate"]))
-        if "bitrate" in self.config:
+        if "bitrate" in self.config and self.config["bitrate"]:
             args.append("-bitrate")
             args.append(str(self.config["bitrate"]))
         if "audio" in self.config:
@@ -93,14 +103,48 @@ class Moonlight:
             args.append("-input")
             args.append(str(self.config["input"]))
         if "localaudio" in self.config:
-            if self.config["localaudio"] != 0:
+            if self.config["localaudio"]:
                 args.append("-localaudio")
+        if "surround" in self.config:
+            if self.config["surround"]:
+                args.append("-surround")
+        if "remote" in self.config:
+            if self.config["remote"]:
+                args.append("-remote")
+        if "sops" in self.config:
+            if not self.config["sops"]:
+                args.append("-nosops")
+        if "quitappafter" in self.config:
+            if self.config["quitappafter"]:
+                args.append("-quitappafter")
+        if "codec" in self.config and self.config["codec"] != "auto":
+            args.append("-codec")
+            args.append(str(self.config["codec"]))
+        if "unsupported" in self.config:
+            if self.config["unsupported"]:
+                args.append("-unsupported")
         if app:
             args.append("-app")
-            args.append(app)
+            args.append('"' + app + '"')
 
         print("Exec: " + str(args))
         return self.execute(args)
+
+    def isIpDefined(self):
+        return self.ip is not None
+
+    def getConfigPath(self):
+        return os.path.join(self.configdir, "config.txt")
+
+    def getMappingPath(self):
+        return os.path.join(self.configdir, "mapping.txt")
+
+    def hasGamepadMapping(self):
+        return os.path.isfile(self.getMappingPath())
+
+    def clearGamepadMapping(self):
+        if self.hasGamepadMapping():
+            os.remove(self.getMappingPath())
 
     def setAction(self, action):
         self.action = action
