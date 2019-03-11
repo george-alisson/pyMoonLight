@@ -88,7 +88,7 @@ class Moonlight:
         args = ["stream"]
         if self.hasGamepadMapping():
             args.append("-mapping")
-            args.append(self.getMappingPath())
+            args.append('"{}"'.format(self.getMappingPath()))
         if "width" in self.config:
             args.append("-width")
             args.append(str(self.config["width"]))

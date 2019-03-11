@@ -222,7 +222,7 @@ class Startup:
 
 
     def loadMapping(self, loadMenu=False):
-        proc = self.moonlight.execute(["map", "mapping.map"], False)
+        proc = self.moonlight.execute(["map", '"{}"'.format(self.moonlight.getMappingPath())], False)
         while True:
             line = proc.stdout.readline()
             if line == '':
