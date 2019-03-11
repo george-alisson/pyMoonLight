@@ -15,6 +15,10 @@ class Computer:
     def __init__(self, name, ip):
         self.name = name
         self.ip = ip
+        self.uuid = uuid.uuid5(uuid.NAMESPACE_DNS, name + ip)
+
+    def __repr__(self):
+        return "Computer(name='{}', ip='{}')".format(self.name, self.ip)
 
 class App:
 
@@ -83,33 +87,38 @@ def search_pcs(timeout=3, first=True):
         zeroconf.close()
     return listener.pcs
 
+KEYDIR = os.path.expanduser("~/.cache/pymoonlight")
+
 UNIQUEID = None
 def get_uniqueid():
     global UNIQUEID
     if not UNIQUEID:
-        with open(r"bin/uniqueid.dat", "r") as f:
+        with open(os.path.join(KEYDIR, "uniqueid.dat"), "r") as f:
             UNIQUEID = f.read()
     return UNIQUEID
 
 def get_apps(server, sort=True):
-    url = "https://{0}:47984/applist?uniqueid={1}&uuid={2}".format(server, get_uniqueid(), uuid.uuid1().hex)
-    r = requests.get(url, cert=(r'bin/client.pem', r'bin/key.pem'), verify=False)
-    root = etree.fromstring(r.content.decode("utf-8").encode("utf-16"))
-    apps = []
-    for eapp in root.xpath("App"):
-        id = int(eapp.xpath("ID")[0].text)
-        title = eapp.xpath("AppTitle")[0].text
-        apps.append(App(id, title))
-    if sort:
-        apps.sort()
-    return apps
+    try:
+        apps = []
+        url = "https://{0}:47984/applist?uniqueid={1}&uuid={2}".format(server, get_uniqueid(), uuid.uuid1().hex)
+        r = requests.get(url, cert=(os.path.join(KEYDIR, "client.pem"), os.path.join(KEYDIR, "key.pem")), verify=False)
+        root = etree.fromstring(r.content.decode("utf-8").encode("utf-16"))
+        for eapp in root.xpath("App"):
+            id = int(eapp.xpath("ID")[0].text)
+            title = eapp.xpath("AppTitle")[0].text
+            apps.append(App(id, title))
+        if sort:
+            apps.sort()
+        return apps
+    except:
+        return list()
 
 def get_boxart(server, appid):
     if not os.path.exists("boxart"):
         os.makedirs("boxart")
     filename = "boxart\{0}.png".format(appid)
     url = 'https://{0}:47984/appasset?appid={1}&AssetType=2&AssetIdx=0&uniqueid={2}&uuid={3}'.format(server, appid, get_uniqueid(), uuid.uuid1().hex)
-    r = requests.get(url, cert=(r'bin/client.pem', r'bin/key.pem'), verify=False)
+    r = requests.get(url, cert=(os.path.join(KEYDIR, "client.pem"), os.path.join(KEYDIR, "key.pem")), verify=False)
     with open(filename, "wb") as img:
         img.write(r.content)
     return filename

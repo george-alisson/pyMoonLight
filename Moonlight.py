@@ -13,7 +13,8 @@ class Moonlight:
         # Other
         self.executable = "moonlight"
         self.workingdir = "bin"
-        self.configdir = "~/.config/pymoonlight"
+        self.configdir = os.path.expanduser("~/.config/pymoonlight")
+        self.keydir = os.path.expanduser("~/.cache/pymoonlight")
         self.proc = None
 
     def loadConfig(self):
@@ -34,13 +35,15 @@ class Moonlight:
             json.dump(self.config, outfile)
 
     def execute(self, args, includeip=True):
-        ar = [self.executable]
+        ar = [self.executable, "-keydir", '"{}"'.format(self.keydir)]
         ar += args
         if includeip and self.isIpDefined():
             ar += [self.ip]
 
         if not os.path.exists(self.workingdir):
             os.makedirs(self.workingdir)
+        if not os.path.exists(self.keydir):
+            os.makedirs(self.keydir)
 
         self.proc = subprocess.Popen(ar, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=self.workingdir)
         return self.proc
@@ -49,8 +52,10 @@ class Moonlight:
 
         if not os.path.exists(self.workingdir):
             os.makedirs(self.workingdir)
+        if not os.path.exists(self.keydir):
+            os.makedirs(self.keydir)
 
-        child = pexpect.spawn('{} {}'.format(self.executable, 'pair'), cwd=self.workingdir)
+        child = pexpect.spawn('{} -keydir "{}" pair'.format(self.executable, self.keydir), cwd=self.workingdir)
         child.expect('[1-9]{4}')
         return child
 
@@ -125,7 +130,7 @@ class Moonlight:
                 args.append("-unsupported")
         if app:
             args.append("-app")
-            args.append('"' + app + '"')
+            args.append('"{}"'.format(app))
 
         print("Exec: " + str(args))
         return self.execute(args)
