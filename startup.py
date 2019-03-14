@@ -313,7 +313,7 @@ class Startup:
         def get_tiles_by_apps(apps):
             tiles = []
             for app in apps:
-                filename = "boxart\{0}.png".format(app.id)
+                filename = os.path.join(Nvstream.BOXARTDIR, "{0}.png".format(app.id))
                 tile = GameMenu.Tile(app.title, filename)
                 if not os.path.isfile(filename):
                     t = Nvstream.BoxArtThread(self.moonlight.ip, app.id, gm.draw_tile, tile)

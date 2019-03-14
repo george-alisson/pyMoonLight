@@ -115,8 +115,8 @@ def get_apps(server, sort=True):
         return list()
 
 def get_boxart(server, appid):
-    if not os.path.exists("BOXARTDIR"):
-        os.makedirs("BOXARTDIR")
+    if not os.path.exists(BOXARTDIR):
+        os.makedirs(BOXARTDIR)
     filename = os.path.join(BOXARTDIR, "{0}.png".format(appid))
     url = 'https://{0}:47984/appasset?appid={1}&AssetType=2&AssetIdx=0&uniqueid={2}&uuid={3}'.format(server, appid, get_uniqueid(), uuid.uuid1().hex)
     r = requests.get(url, cert=(os.path.join(KEYDIR, "client.pem"), os.path.join(KEYDIR, "key.pem")), verify=False)
