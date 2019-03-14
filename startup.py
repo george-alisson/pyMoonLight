@@ -222,7 +222,7 @@ class Startup:
 
 
     def loadMapping(self, loadMenu=False):
-        proc = self.moonlight.execute(["map", '"{}"'.format(self.moonlight.getMappingPath())], False)
+        proc = self.moonlight.execute(["map", "-input /dev/input/event0"], False)
         while True:
             line = proc.stdout.readline()
             if line == '':
@@ -658,6 +658,7 @@ class Startup:
             self.moonlight.config = {}
             self.moonlight.saveConfig()
             self.moonlight.loadConfig()
+            Nvstream.romeve_boxarts()
             return self.loadMainMenu()
 
         return self.loadAdvSettings()

@@ -88,6 +88,7 @@ def search_pcs(timeout=3, first=True):
     return listener.pcs
 
 KEYDIR = os.path.expanduser("~/.cache/pymoonlight")
+BOXARTDIR = os.path.expanduser("~/.cache/pymoonlight/boxart")
 
 UNIQUEID = None
 def get_uniqueid():
@@ -114,9 +115,9 @@ def get_apps(server, sort=True):
         return list()
 
 def get_boxart(server, appid):
-    if not os.path.exists("boxart"):
-        os.makedirs("boxart")
-    filename = "boxart\{0}.png".format(appid)
+    if not os.path.exists("BOXARTDIR"):
+        os.makedirs("BOXARTDIR")
+    filename = os.path.join(BOXARTDIR, "{0}.png".format(appid))
     url = 'https://{0}:47984/appasset?appid={1}&AssetType=2&AssetIdx=0&uniqueid={2}&uuid={3}'.format(server, appid, get_uniqueid(), uuid.uuid1().hex)
     r = requests.get(url, cert=(os.path.join(KEYDIR, "client.pem"), os.path.join(KEYDIR, "key.pem")), verify=False)
     with open(filename, "wb") as img:
@@ -124,5 +125,5 @@ def get_boxart(server, appid):
     return filename
 
 def romeve_boxarts():
-    shutil.rmtree("boxart", True)
+    shutil.rmtree(BOXARTDIR, True)
 
