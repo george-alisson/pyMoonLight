@@ -67,42 +67,42 @@ class Startup:
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
         # Set driver, fix problems on certain devices
-        #drivers = ['fbcon', 'directfb', 'svgalib']
-        #found = False
-        #for driver in drivers:
-        #    if not os.getenv('SDL_VIDEODRIVER'):
-        #        os.putenv('SDL_VIDEODRIVER', driver)
-        #    try:
-        #        pygame.display.init()
-        #        print("Using {0} as video driver".format(driver))
-        #    except pygame.error:
-        #        continue
-        #    found = True
-        #    break
+        drivers = ['fbcon', 'directfb', 'svgalib']
+        found = False
+        for driver in drivers:
+           if not os.getenv('SDL_VIDEODRIVER'):
+               os.putenv('SDL_VIDEODRIVER', driver)
+           try:
+               pygame.display.init()
+               print("Using {0} as video driver".format(driver))
+           except pygame.error:
+               continue
+           found = True
+           break
 
-        #if not found:
-        #    print("Suitable video driver not found!")
-        #    sys.exit(2)
+        if not found:
+           print("Suitable video driver not found!")
+           sys.exit(2)
 
-        try:
-            pygame.display.init()
-            driver = pygame.display.get_driver()
-            if not os.getenv('SDL_VIDEODRIVER'):
-                os.putenv('SDL_VIDEODRIVER', driver)
-            print("Using {0} as video driver".format(driver))
-        except pygame.error:
-            print("Suitable video driver not found!")
-            sys.exit(2)
+        # try:
+        #     pygame.display.init()
+        #     driver = pygame.display.get_driver()
+        #     if not os.getenv('SDL_VIDEODRIVER'):
+        #         os.putenv('SDL_VIDEODRIVER', driver)
+        #     print("Using {0} as video driver".format(driver))
+        # except pygame.error:
+        #     print("Suitable video driver not found!")
+        #     sys.exit(2)
 
         # Initialize PyGame
         print("Initializing PyGame")
         pygame.init()
         pygame.font.init()
         pygame.display.init()
-        #self.screen = pygame.display.set_mode((pygame.display.Info().current_w, pygame.display.Info().current_h),
-        #                                       pygame.FULLSCREEN)
-        os.environ['SDL_VIDEO_WINDOW_POS'] = "0,0"
-        self.screen = pygame.display.set_mode((1280,720), pygame.NOFRAME)
+        self.screen = pygame.display.set_mode((pygame.display.Info().current_w, pygame.display.Info().current_h),
+                                              pygame.FULLSCREEN)
+        # os.environ['SDL_VIDEO_WINDOW_POS'] = "0,0"
+        # self.screen = pygame.display.set_mode((1280,720), pygame.NOFRAME)
         self.screen.fill((0, 0, 0))
         pygame.display.update()
 
@@ -225,9 +225,9 @@ class Startup:
         proc = self.moonlight.execute(["map", "-input /dev/input/event0"], False)
         while True:
             line = proc.stdout.readline()
-            print(line)
-            if line == '':
+            if not line:
                 break
+            print(line)
             self.menu.msg(line.rstrip())
             time.sleep(0.25)
         if loadMenu:
@@ -295,11 +295,11 @@ class Startup:
                 proc = self.moonlight.stream(game.getText().split(". ")[1].rstrip())
                 while True:
                     line = proc.stdout.readline()
-                    print(line)
-                    if line == '':
+                    if not line:
                         break
+                    print(line)
                     self.menu.msg("Stream starting", desc=line.rstrip())
-                    time.sleep(1)
+                    time.sleep(0.25)
                 self.menu.msg("Please wait", desc="Waiting for process to end")
                 proc.wait()
                 self.menu.setColors()
@@ -334,11 +334,11 @@ class Startup:
             proc = self.moonlight.stream(out)
             while True:
                 line = proc.stdout.readline()
-                print(line)
-                if line == '':
+                if not line:
                     break
+                print(line)
                 self.menu.msg("Stream starting", desc=line.rstrip())
-                time.sleep(1)
+                time.sleep(0.25)
             self.menu.msg("Please wait", desc="Waiting for process to end")
             proc.wait()
             self.menu.setColors()
@@ -349,14 +349,14 @@ class Startup:
     def loadStartSteam(self):
         self.menu.setColors(bg=[0, 0, 0])
         self.menu.msg("Stream starting")
-        proc = self.moonlight.stream("steam")
+        proc = self.moonlight.stream("Steam")
         while True:
             line = proc.stdout.readline()
-            print(line)
-            if line == '':
+            if not line:
                 break
+            print(line)
             self.menu.msg("Stream starting", desc=line.rstrip())
-            time.sleep(1)
+            time.sleep(0.25)
         self.menu.msg("Please wait", desc="Waiting for process to end")
         proc.wait()
         self.menu.setColors()
