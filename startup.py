@@ -225,9 +225,11 @@ class Startup:
         proc = self.moonlight.execute(["map", "-input /dev/input/event0"], False)
         while True:
             line = proc.stdout.readline()
+            print(line)
             if line == '':
                 break
             self.menu.msg(line.rstrip())
+            time.sleep(0.25)
         if loadMenu:
             return self.loadMainMenu()
 
@@ -293,9 +295,11 @@ class Startup:
                 proc = self.moonlight.stream(game.getText().split(". ")[1].rstrip())
                 while True:
                     line = proc.stdout.readline()
+                    print(line)
                     if line == '':
                         break
                     self.menu.msg("Stream starting", desc=line.rstrip())
+                    time.sleep(1)
                 self.menu.msg("Please wait", desc="Waiting for process to end")
                 proc.wait()
                 self.menu.setColors()
@@ -330,9 +334,11 @@ class Startup:
             proc = self.moonlight.stream(out)
             while True:
                 line = proc.stdout.readline()
+                print(line)
                 if line == '':
                     break
                 self.menu.msg("Stream starting", desc=line.rstrip())
+                time.sleep(1)
             self.menu.msg("Please wait", desc="Waiting for process to end")
             proc.wait()
             self.menu.setColors()
@@ -346,9 +352,11 @@ class Startup:
         proc = self.moonlight.stream("steam")
         while True:
             line = proc.stdout.readline()
+            print(line)
             if line == '':
                 break
             self.menu.msg("Stream starting", desc=line.rstrip())
+            time.sleep(1)
         self.menu.msg("Please wait", desc="Waiting for process to end")
         proc.wait()
         self.menu.setColors()
